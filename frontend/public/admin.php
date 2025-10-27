@@ -7,15 +7,23 @@ function requireLogin() {
     $validPassword = 'admin123'; // In production, use proper hashed passwords
 
     if (!isset($_SESSION['admin_logged_in'])) {
-        if (!isset($_SERVER['PHP_AUTH_USER']) || 
-            $_SERVER['PHP_AUTH_USER'] !== $validUsername || 
-            $_SERVER['PHP_AUTH_PW'] !== $validPassword) {
-            header('WWW-Authenticate: Basic realm="Admin Area"');
+        // Prefer session-based login. If PHP is running under an environment
+        // that doesn't populate PHP_AUTH_USER (common with some CGI setups),
+        // redirect to a simple login form instead of forcing HTTP Basic auth.
+        if (isset($_SERVER['PHP_AUTH_USER'])) {
+            if ($_SERVER['PHP_AUTH_USER'] === $validUsername && ($_SERVER['PHP_AUTH_PW'] ?? '') === $validPassword) {
+                $_SESSION['admin_logged_in'] = true;
+                return;
+            }
+            // Invalid credentials provided via HTTP auth
             header('HTTP/1.0 401 Unauthorized');
             echo 'Authentication required';
             exit;
         }
-        $_SESSION['admin_logged_in'] = true;
+
+        // No session and no PHP_AUTH_USER - redirect to login form
+        header('Location: /admin/login.php');
+        exit;
     }
 }
 
