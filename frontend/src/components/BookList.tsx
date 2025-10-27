@@ -1,13 +1,26 @@
 import React, { useEffect, useState } from 'react';
 
+interface Book {
+    id: number | string;
+    title: string;
+    author: string;
+    description?: string;
+}
+
 const BookList: React.FC = () => {
-    const [books, setBooks] = useState([]);
+    const [books, setBooks] = useState<Book[]>([]);
 
     useEffect(() => {
         const fetchBooks = async () => {
-            const response = await fetch('/api/books');
-            const data = await response.json();
-            setBooks(data);
+            try {
+                const response = await fetch('/api/books');
+                if (!response.ok) return;
+                const data: Book[] = await response.json();
+                setBooks(data);
+            } catch (e) {
+                // swallow fetch errors in the UI for now
+                console.error('Failed to fetch books', e);
+            }
         };
 
         fetchBooks();

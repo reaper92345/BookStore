@@ -4,10 +4,29 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Online Bookstore</title>
-    <link rel="stylesheet" href="%PUBLIC_URL%/styles.css">
+    <link rel="stylesheet" href="./styles.css">
+    <meta name="theme-color" content="#ffffff">
+    <meta name="description" content="A simple online bookstore front-end">
 </head>
 <body>
-    <div id="root"></div>
-    <script src="%PUBLIC_URL%/bundle.js"></script>
+    <div id="app">
+        <header>
+            <h1>Online Bookstore</h1>
+            <nav><a href="/">Home</a> | <a href="/books">Books</a></nav>
+        </header>
+
+        <main id="root">
+            <section id="book-list">
+                <h2>Book List</h2>
+                <ul id="books"></ul>
+            </section>
+        </main>
+
+        <footer>
+            <p>© Online Bookstore</p>
+        </footer>
+    </div>
+
+    <script src="./main.js"></script>
 </body>
 </html>

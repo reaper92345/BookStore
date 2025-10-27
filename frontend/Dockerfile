@@ -1,16 +1,24 @@
-FROM node:14
+FROM php:8.1-apache
 
-WORKDIR /app
+# Install PHP extensions and required packages
+RUN apt-get update && apt-get install -y \
+    libpq-dev \
+    && docker-php-ext-install pdo pdo_mysql \
+    && a2enmod rewrite headers
 
-COPY package.json ./
-COPY package-lock.json ./
+# Configure PHP
+RUN echo "error_reporting = E_ALL" >> /usr/local/etc/php/conf.d/docker-php-ext-errors.ini \
+    && echo "display_errors = On" >> /usr/local/etc/php/conf.d/docker-php-ext-errors.ini
 
-RUN npm install
+# Configure Apache
+RUN echo "ServerName localhost" >> /etc/apache2/apache2.conf \
+    && sed -i 's/AllowOverride None/AllowOverride All/g' /etc/apache2/apache2.conf
 
-COPY . .
+WORKDIR /var/www/html
 
-RUN npm run build
+# Apache configuration will be mounted from host
+# Files will be mounted from host at runtime
 
-EXPOSE 3000
+EXPOSE 80
 
-CMD ["npm", "start"]
+CMD ["apache2-foreground"]

@@ -3,6 +3,9 @@ FROM python:3.9
 # Set the working directory
 WORKDIR /app
 
+# Install MySQL client libraries
+RUN apt-get update && apt-get install -y default-libmysqlclient-dev pkg-config && rm -rf /var/lib/apt/lists/*
+
 # Copy the requirements file
 COPY requirements.txt .
 
