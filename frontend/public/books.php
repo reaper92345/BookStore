@@ -1,7 +1,6 @@
 <?php
-// Simple server-side rendered index page that fetches books from the backend
+// Books listing page — similar to the featured grid on index.php
 function fetch_books(): array {
-    // Try internal Docker hostname first, then fall back to localhost
     $candidates = [
         'http://backend:8000/books/',
         'http://localhost:8000/books/',
@@ -19,16 +18,12 @@ function fetch_books(): array {
     foreach ($candidates as $url) {
         $context = stream_context_create($opts);
         $json = @file_get_contents($url, false, $context);
-        if ($json === false) {
-            continue;
-        }
+        if ($json === false) continue;
         $data = json_decode($json, true);
-        if (is_array($data)) {
-            return $data;
-        }
+        if (is_array($data)) return $data;
     }
 
-    error_log('fetch_books: failed to fetch books from any candidate URL: ' . implode(', ', $candidates));
+    error_log('fetch_books (books.php): failed to fetch books from any candidate URL');
     return [];
 }
 
@@ -39,7 +34,7 @@ $books = fetch_books();
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width,initial-scale=1">
-        <title>Online Bookstore</title>
+        <title>Books — Online Bookstore</title>
         <link rel="stylesheet" href="/styles.css">
         <script defer src="/main.js"></script>
     </head>
@@ -59,33 +54,13 @@ $books = fetch_books();
             </header>
 
             <main>
-                <section class="hero">
-                    <div class="container hero-inner">
-                        <div class="hero-text">
-                            <h1>Find your next great read</h1>
-                            <p>Discover bestsellers, timeless classics, and new releases — curated for you.</p>
-                            <div class="hero-actions">
-                                <a class="btn btn-primary" href="/books.php">Browse Books</a>
-                                <!-- <a class="btn btn-outline" href="/admin.php">Admin Panel</a> -->
-                            </div>
-                        </div>
-                        <div class="hero-image">
-                            <img src="/images/hero-books.svg" alt="Books illustration" />
-                        </div>
-                    </div>
-                </section>
-
-                <section class="container search-section">
-                    <input id="searchInput" class="search" placeholder="Search by title or author…" aria-label="Search books">
-                </section>
-
-                <section class="container featured">
-                    <h2>Featured Books</h2>
+                <section class="container">
+                    <h1>All Books</h1>
                     <div id="booksGrid" class="grid">
                         <?php if (empty($books)): ?>
                             <div class="empty">No books available right now.</div>
                         <?php else: ?>
-                                <?php foreach ($books as $book): ?>
+                            <?php foreach ($books as $book): ?>
                                 <article class="card" data-title="<?=htmlspecialchars($book['title'] ?? '')?>" data-author="<?=htmlspecialchars($book['author'] ?? '')?>">
                                     <div class="card-cover">
                                         <img src="/images/book-placeholder.png" alt="<?=htmlspecialchars($book['title'] ?? 'Book')?>">
@@ -95,7 +70,7 @@ $books = fetch_books();
                                         <p class="card-author"><?=htmlspecialchars($book['author'] ?? '')?></p>
                                         <p class="card-desc"><?=htmlspecialchars(substr($book['description'] ?? '', 0, 140))?><?= (strlen($book['description'] ?? '')>140)?'...':'' ?></p>
                                         <div class="card-meta">
-                                              <span class="price">NPR <?=number_format($book['price'] ?? 0, 2)?></span>
+                                            <span class="price">NPR <?=number_format($book['price'] ?? 0, 2)?></span>
                                             <span class="stock"><?=intval($book['stock'] ?? 0)?> in stock</span>
                                         </div>
                                         <div class="card-actions">
