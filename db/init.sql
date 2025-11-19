@@ -13,6 +13,7 @@ CREATE TABLE books (
     description TEXT,
     price DECIMAL(10, 2) NOT NULL,
     stock INT NOT NULL,
+    owner_id INT DEFAULT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB;
 

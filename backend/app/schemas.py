@@ -11,6 +11,13 @@ class BookBase(BaseModel):
 class BookCreate(BookBase):
     pass
 
+class BookUpdate(BaseModel):
+    title: Optional[str] = None
+    author: Optional[str] = None
+    description: Optional[str] = None
+    price: Optional[float] = None
+    stock: Optional[int] = None
+
 class Book(BookBase):
     id: int
 
@@ -24,8 +31,29 @@ class UserBase(BaseModel):
 class UserCreate(UserBase):
     password: str
 
+class UserLogin(BaseModel):
+    username: str
+    password: str
+
 class User(UserBase):
     id: int
+
+    class Config:
+        orm_mode = True
+
+class CartItemCreate(BaseModel):
+    book_id: int
+    quantity: int
+
+class CartItem(CartItemCreate):
+    id: int
+
+    class Config:
+        orm_mode = True
+
+class Cart(BaseModel):
+    id: int
+    items: List[CartItem] = []
 
     class Config:
         orm_mode = True
@@ -39,19 +67,38 @@ class OrderItemCreate(OrderItemBase):
 
 class OrderItem(OrderItemBase):
     id: int
+    price: float
 
     class Config:
         orm_mode = True
 
 class OrderBase(BaseModel):
     user_id: int
-    items: List[OrderItemCreate]
 
 class OrderCreate(OrderBase):
-    pass
+    items: List[OrderItemCreate]
 
 class Order(OrderBase):
     id: int
+    items: List[OrderItem] = []
+    status: str = 'pending'
 
     class Config:
         orm_mode = True
+
+class CommentCreate(BaseModel):
+    book_id: int
+    user_id: int
+    content: str
+    rating: int
+
+class Comment(CommentCreate):
+    id: int
+    status: str = 'pending'
+
+    class Config:
+        orm_mode = True
+
+class Token(BaseModel):
+    access_token: str
+    token_type: str
