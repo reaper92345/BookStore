@@ -1,10 +1,9 @@
 <?php
 require_once 'auth.php';
-
-$api_url = "http://backend:8000";  // Internal Docker network URL
-
-// Fetch comments with book and user details
-$comments = json_decode(file_get_contents("$api_url/comments"), true);
+require_once __DIR__ . '/../api/config.php';
+// Fetch comments with book and user details using server-side candidate list
+$comments_result = backend_request('GET', '/comments');
+$comments = $comments_result['data'] ?? [];
 ?>
 
 <!DOCTYPE html>
@@ -60,6 +59,7 @@ $comments = json_decode(file_get_contents("$api_url/comments"), true);
     </div>
 
     <script>
+        const api_url = '<?php echo $api_base; ?>';
         function updateCommentStatus(id, status) {
             fetch(`${api_url}/comments/${id}`, {
                 method: 'PUT',

@@ -7,6 +7,8 @@ class BookBase(BaseModel):
     description: Optional[str] = None
     price: float
     stock: int
+    file_path: Optional[str] = None
+    thumbnail_path: Optional[str] = None
 
 class BookCreate(BookBase):
     pass
@@ -42,17 +44,24 @@ class User(UserBase):
         orm_mode = True
 
 class CartItemCreate(BaseModel):
+    cart_id: str
     book_id: int
     quantity: int
 
-class CartItem(CartItemCreate):
+class CartItemUpdate(BaseModel):
+    quantity: int
+
+class CartItem(BaseModel):
     id: int
+    book_id: int
+    quantity: int
+    book: Book
 
     class Config:
         orm_mode = True
 
 class Cart(BaseModel):
-    id: int
+    id: str
     items: List[CartItem] = []
 
     class Config:

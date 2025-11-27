@@ -1,10 +1,10 @@
 <?php
 require_once 'auth.php';
 
-$api_url = "http://backend:8000";  // Internal Docker network URL
-
-// Fetch orders with user and item details
-$orders = json_decode(file_get_contents("$api_url/orders"), true);
+require_once __DIR__ . '/../api/config.php';
+// Fetch orders using server-side backend candidates
+$orders_result = backend_request('GET', '/orders');
+$orders = $orders_result['data'] ?? [];
 ?>
 
 <!DOCTYPE html>
@@ -93,6 +93,8 @@ $orders = json_decode(file_get_contents("$api_url/orders"), true);
     </div>
 
     <script>
+        const api_url = '<?php echo $api_base; ?>';
+
         function viewOrderDetails(id) {
             fetch(`${api_url}/orders/${id}`)
                 .then(response => response.json())

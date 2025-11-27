@@ -1,10 +1,10 @@
 <?php
 require_once 'auth.php';
 
-$api_url = "http://backend:8000";  // Internal Docker network URL
-
-// Fetch users
-$users = json_decode(file_get_contents("$api_url/users"), true);
+require_once __DIR__ . '/../api/config.php';
+// Fetch users using server-side backend candidates
+$users_result = backend_request('GET', '/users');
+$users = $users_result['data'] ?? [];
 ?>
 
 <!DOCTYPE html>
@@ -98,6 +98,8 @@ $users = json_decode(file_get_contents("$api_url/users"), true);
     </div>
 
     <script>
+        const api_url = '<?php echo $api_base; ?>';
+
         function showAddUserForm() {
             document.getElementById('modalTitle').textContent = 'Add New User';
             document.getElementById('userForm').reset();

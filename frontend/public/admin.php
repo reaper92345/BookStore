@@ -24,36 +24,13 @@ function requireLogin() {
 
 requireLogin();
 
-// API function to make backend requests
+// Prefer trying backend candidates directly from server-side PHP to avoid depending
+// on HTTP_HOST/port which may be a client dev server. Use the shared helper.
+require_once __DIR__ . '/api/config.php';
+
 function callApi($method, $endpoint, $data = null) {
-    $url = "http://backend:8000" . $endpoint;
-    $ch = curl_init();
-    
-    $options = [
-        CURLOPT_URL => $url,
-        CURLOPT_RETURNTRANSFER => true,
-        CURLOPT_CUSTOMREQUEST => $method,
-        CURLOPT_HTTPHEADER => ['Content-Type: application/json'],
-        CURLOPT_TIMEOUT => 10,
-        CURLOPT_CONNECTTIMEOUT => 10
-    ];
-    
-    if ($data && ($method === 'POST' || $method === 'PUT')) {
-        $options[CURLOPT_POSTFIELDS] = json_encode($data);
-    }
-    
-    curl_setopt_array($ch, $options);
-    $response = curl_exec($ch);
-    $statusCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-    $error = curl_error($ch);
-    curl_close($ch);
-    
-    return [
-        'data' => json_decode($response, true),
-        'status' => $statusCode,
-        'error' => $error,
-        'raw_response' => $response
-    ];
+    // backend_request returns data/status/error/raw_response/candidate
+    return backend_request($method, $endpoint, $data);
 }
 
 // Handle form submissions
@@ -133,6 +110,17 @@ $books = $books_result['data'] ?? [];
 
 if ($books_result['status'] !== 200) {
     $error_msg = "Failed to fetch books from server.";
+    $details = [];
+    if (isset($books_result['status'])) $details[] = 'status=' . $books_result['status'];
+    if (!empty($books_result['error'])) $details[] = 'curl_error=' . $books_result['error'];
+    if (!empty($books_result['raw_response'])) {
+        // include a short preview of the raw response
+        $preview = substr($books_result['raw_response'], 0, 512);
+        $details[] = 'response_preview=' . str_replace("\n", ' ', $preview);
+    }
+    if (!empty($details)) {
+        $error_msg .= ' (' . implode('; ', $details) . ')';
+    }
 }
 ?>
 <!DOCTYPE html>

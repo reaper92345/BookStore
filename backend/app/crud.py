@@ -53,12 +53,52 @@ def authenticate_user(db: Session, username: str, password: str):
 
 # Cart operations
 def add_to_cart(db: Session, cart_item: schemas.CartItemCreate):
-    # For now, return a simple response
-    return {"message": "Item added to cart"}
+    # Check if cart exists
+    cart = db.query(models.Cart).filter(models.Cart.id == cart_item.cart_id).first()
+    if not cart:
+        cart = models.Cart(id=cart_item.cart_id)
+        db.add(cart)
+        db.commit()
+        db.refresh(cart)
 
-def get_cart(db: Session):
-    # Return empty cart for now
-    return []
+    # Check if item exists in cart
+    db_item = db.query(models.CartItem).filter(
+        models.CartItem.cart_id == cart_item.cart_id,
+        models.CartItem.book_id == cart_item.book_id
+    ).first()
+
+    if db_item:
+        db_item.quantity += cart_item.quantity
+        db.commit()
+        db.refresh(db_item)
+        return {"message": "Item quantity updated", "item": db_item}
+    else:
+        db_item = models.CartItem(**cart_item.dict())
+        db.add(db_item)
+        db.commit()
+        db.refresh(db_item)
+        return {"message": "Item added to cart", "item": db_item}
+
+def update_cart_item(db: Session, item_id: int, quantity: int):
+    db_item = db.query(models.CartItem).filter(models.CartItem.id == item_id).first()
+    if db_item:
+        db_item.quantity = quantity
+        db.commit()
+        db.refresh(db_item)
+    return db_item
+
+def remove_from_cart(db: Session, item_id: int):
+    db_item = db.query(models.CartItem).filter(models.CartItem.id == item_id).first()
+    if db_item:
+        db.delete(db_item)
+        db.commit()
+    return db_item
+
+def get_cart(db: Session, cart_id: str):
+    cart = db.query(models.Cart).filter(models.Cart.id == cart_id).first()
+    if not cart:
+        return []
+    return cart.items
 
 # Order operations
 def get_orders(db: Session):
