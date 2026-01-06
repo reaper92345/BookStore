@@ -2,7 +2,7 @@
 
 function api_base(): string {
     $scheme = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
-    // Prefer SERVER_NAME/PORT to avoid client-provided Host header (e.g. dev servers on :3000)
+    
     $server = $_SERVER['SERVER_NAME'] ?? ($_SERVER['HTTP_HOST'] ?? 'localhost');
     $port = $_SERVER['SERVER_PORT'] ?? null;
     $host = $server;
@@ -38,7 +38,7 @@ function fetch_books(): array {
         }
         $data = json_decode($json, true);
         if (is_array($data)) {
-            // store successful candidate for debugging if needed
+            
             if (!isset($GLOBALS['BOOKS_FETCHED_FROM'])) $GLOBALS['BOOKS_FETCHED_FROM'] = $url;
             return $data;
         }
@@ -92,8 +92,8 @@ $books = fetch_books();
                             <h1>Find your next great read</h1>
                             <p>Discover bestsellers, timeless classics, and new releases — curated for you.</p>
                             <div class="hero-actions">
-                                <a class="btn btn-primary" href="/books.php">Browse Books</a>
-                                <!-- <a class="btn btn-outline" href="/admin.php">Admin Panel</a> -->
+                                <!--<a class="btn btn-primary" href="/books.php">Browse Books</a>
+                                 <a class="btn btn-outline" href="/admin.php">Admin Panel</a> -->
                             </div>
                         </div>
                         <div class="hero-image">
@@ -115,7 +115,8 @@ $books = fetch_books();
                                 <?php foreach ($books as $book): ?>
                                 <article class="card" data-id="<?=htmlspecialchars($book['id'] ?? '')?>" data-title="<?=htmlspecialchars($book['title'] ?? '')?>" data-author="<?=htmlspecialchars($book['author'] ?? '')?>">
                                     <div class="card-cover">
-                                        <img src="/images/book-placeholder.png" alt="<?=htmlspecialchars($book['title'] ?? 'Book')?>">
+                                        <?php $thumb = (!empty($book['thumbnail_path'])) ? '/api/' . $book['thumbnail_path'] : '/images/book-placeholder.png'; ?>
+                                        <img src="<?=htmlspecialchars($thumb)?>" alt="<?=htmlspecialchars($book['title'] ?? 'Book')?>">
                                     </div>
                                     <div class="card-body">
                                         <h3 class="card-title"><?=htmlspecialchars($book['title'] ?? 'Untitled')?></h3>
@@ -127,7 +128,7 @@ $books = fetch_books();
                                         </div>
                                         <div class="card-actions">
                                             <button class="btn btn-primary btn-buy" data-id="<?=htmlspecialchars($book['id'] ?? '')?>">Add to cart</button>
-                                            <a class="btn btn-outline btn-view" href="#">View</a>
+                                            <a class="btn btn-outline btn-view" href="/book-details.php?id=<?=htmlspecialchars($book['id'] ?? '')?>">View</a>
                                         </div>
                                     </div>
                                 </article>

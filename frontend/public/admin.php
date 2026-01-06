@@ -28,9 +28,9 @@ requireLogin();
 // on HTTP_HOST/port which may be a client dev server. Use the shared helper.
 require_once __DIR__ . '/api/config.php';
 
-function callApi($method, $endpoint, $data = null) {
+function callApi($method, $endpoint, $data = null, $isMultipart = false) {
     // backend_request returns data/status/error/raw_response/candidate
-    return backend_request($method, $endpoint, $data);
+    return backend_request($method, $endpoint, $data, $isMultipart);
 }
 
 // Handle form submissions
@@ -43,13 +43,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     
     switch ($action) {
         case 'create_book':
-            $result = callApi('POST', '/books/', [
+            $postData = [
+                'action' => 'create_book',
                 'title' => $_POST['title'] ?? '',
                 'author' => $_POST['author'] ?? '',
                 'description' => $_POST['description'] ?? '',
                 'price' => (float)($_POST['price'] ?? 0),
                 'stock' => (int)($_POST['stock'] ?? 0)
-            ]);
+            ];
+
+            // Handle file uploads
+            if (isset($_FILES['pdf_file']) && $_FILES['pdf_file']['error'] === UPLOAD_ERR_OK) {
+                $postData['file'] = new CURLFile($_FILES['pdf_file']['tmp_name'], $_FILES['pdf_file']['type'], $_FILES['pdf_file']['name']);
+            }
+            if (isset($_FILES['thumbnail_file']) && $_FILES['thumbnail_file']['error'] === UPLOAD_ERR_OK) {
+                $postData['thumbnail'] = new CURLFile($_FILES['thumbnail_file']['tmp_name'], $_FILES['thumbnail_file']['type'], $_FILES['thumbnail_file']['name']);
+            }
+
+            $result = callApi('POST', '/books/', $postData, true);
             
             if ($result['status'] === 200 || $result['status'] === 201) {
                 $success_msg = "Book created successfully!";
@@ -59,7 +70,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $error_msg .= " Error: {$result['error']}";
                 }
                 if (isset($result['data']['detail'])) {
-                    $error_msg .= " Details: {$result['data']['detail']}";
+                    if (is_array($result['data']['detail'])) {
+                        $error_msg .= " Details: " . json_encode($result['data']['detail']);
+                    } else {
+                        $error_msg .= " Details: {$result['data']['detail']}";
+                    }
                 }
             }
             break;
@@ -339,7 +354,7 @@ if ($books_result['status'] !== 200) {
         <!-- Add/Edit Book Form -->
         <div class="book-form">
             <h2 id="formTitle">Add New Book</h2>
-            <form method="POST" id="bookForm">
+            <form method="POST" id="bookForm" enctype="multipart/form-data">
                 <input type="hidden" name="action" value="create_book">
                 <input type="hidden" name="book_id" id="bookId">
                 
@@ -366,6 +381,17 @@ if ($books_result['status'] !== 200) {
                 <div class="form-group">
                     <label for="stock">Stock *</label>
                     <input type="number" id="stock" name="stock" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="pdf_file">PDF File (Optional)</label>
+                    <input type="file" id="pdf_file" name="pdf_file" accept=".pdf">
+                    <small>If uploaded, the first page will be used as thumbnail if none provided.</small>
+                </div>
+
+                <div class="form-group">
+                    <label for="thumbnail_file">Thumbnail Image (Optional)</label>
+                    <input type="file" id="thumbnail_file" name="thumbnail_file" accept="image/*">
                 </div>
                 
                 <div class="form-buttons">

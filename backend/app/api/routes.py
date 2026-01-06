@@ -42,7 +42,7 @@ def create_book(
             if len(doc) > 0:
                 page = doc.load_page(0)  # Get first page
                 pix = page.get_pixmap()
-                thumbnail_filename = f"{os.path.splitext(file.filename)[0]}_thumb.png"
+                thumbnail_filename = f"{os.path.splitext(os.path.basename(file.filename))[0]}_thumb.png"
                 thumbnail_path = f"{upload_dir}/{thumbnail_filename}"
                 pix.save(thumbnail_path)
                 doc.close()
@@ -62,7 +62,7 @@ def create_book(
     return crud.create_book(db=db, book=book_data)
 
 @router.get("/books/", response_model=list[schemas.Book])
-def read_books(skip: int = 0, limit: int = 10, db: Session = Depends(get_db)):
+def read_books(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
     books = crud.get_books(db=db, skip=skip, limit=limit)
     return books
 

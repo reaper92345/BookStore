@@ -384,3 +384,71 @@ body {
     font-size: 1.6rem;
   }
 }
+
+/* Book Details Page Styles */
+.book-details {
+  display: grid;
+  grid-template-columns: 350px 1fr;
+  gap: 48px;
+  padding: 48px 0;
+  align-items: start;
+}
+
+.details-cover img {
+  width: 100%;
+  border-radius: 16px;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.1);
+}
+
+.details-info h1 {
+  color: var(--white);
+  font-size: 2.5rem;
+  margin: 0 0 8px;
+}
+
+.details-author {
+  font-size: 1.2rem;
+  color: var(--muted);
+  margin-bottom: 24px;
+}
+
+.details-desc {
+  line-height: 1.6;
+  margin-bottom: 32px;
+  font-size: 1.1rem;
+}
+
+.details-meta {
+  display: flex;
+  gap: 24px;
+  align-items: center;
+  margin-bottom: 32px;
+}
+
+.details-meta .price {
+  font-size: 1.5rem;
+  padding: 10px 16px;
+}
+
+.details-actions {
+  display: flex;
+  gap: 16px;
+}
+
+.btn-large {
+  padding: 14px 28px;
+  font-size: 1.1rem;
+  border-radius: 12px;
+}
+
+@media (max-width: 800px) {
+  .book-details {
+    grid-template-columns: 1fr;
+    gap: 32px;
+  }
+  
+  .details-cover {
+    max-width: 300px;
+    margin: 0 auto;
+  }
+}

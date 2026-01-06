@@ -55,7 +55,8 @@ if (empty($books)) {
                             <?php foreach ($books as $book): ?>
                                 <article class="card" data-id="<?=htmlspecialchars($book['id'] ?? '')?>" data-title="<?=htmlspecialchars($book['title'] ?? '')?>" data-author="<?=htmlspecialchars($book['author'] ?? '')?>">
                                     <div class="card-cover">
-                                        <img src="/images/book-placeholder.png" alt="<?=htmlspecialchars($book['title'] ?? 'Book')?>">
+                                        <?php $thumb = (!empty($book['thumbnail_path'])) ? '/api/' . $book['thumbnail_path'] : '/images/book-placeholder.png'; ?>
+                                        <img src="<?=htmlspecialchars($thumb)?>" alt="<?=htmlspecialchars($book['title'] ?? 'Book')?>">
                                     </div>
                                     <div class="card-body">
                                         <h3 class="card-title"><?=htmlspecialchars($book['title'] ?? 'Untitled')?></h3>
@@ -67,7 +68,7 @@ if (empty($books)) {
                                         </div>
                                         <div class="card-actions">
                                             <button class="btn btn-primary btn-buy" data-id="<?=htmlspecialchars($book['id'] ?? '')?>">Add to cart</button>
-                                            <a class="btn btn-outline btn-view" href="#">View</a>
+                                            <a class="btn btn-outline btn-view" href="/book-details.php?id=<?=htmlspecialchars($book['id'] ?? '')?>">View</a>
                                         </div>
                                     </div>
                                 </article>

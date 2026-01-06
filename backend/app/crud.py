@@ -6,7 +6,7 @@ def get_book(db: Session, book_id: int):
     return db.query(models.Book).filter(models.Book.id == book_id).first()
 
 def get_books(db: Session, skip: int = 0, limit: int = 10):
-    return db.query(models.Book).offset(skip).limit(limit).all()
+    return db.query(models.Book).order_by(models.Book.id.desc()).offset(skip).limit(limit).all()
 
 def create_book(db: Session, book: schemas.BookCreate):
     db_book = models.Book(**book.dict())
