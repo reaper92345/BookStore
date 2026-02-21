@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, File, UploadFile, Form
 import shutil
 import os
 from sqlalchemy.orm import Session
-from .. import crud, models, schemas
+from .. import crud, models, schemas, auth
 from ..database import get_db
 
 router = APIRouter()
@@ -121,6 +121,11 @@ def read_user(user_id: int, db: Session = Depends(get_db)):
 
 @router.post("/users/", response_model=schemas.User)
 def create_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
+    db_user = db.query(models.User).filter(
+        (models.User.username == user.username) | (models.User.email == user.email)
+    ).first()
+    if db_user:
+        raise HTTPException(status_code=400, detail="Username or email already registered")
     return crud.create_user(db=db, user=user)
 
 # Auth endpoints
@@ -129,7 +134,21 @@ def login(user: schemas.UserLogin, db: Session = Depends(get_db)):
     db_user = crud.authenticate_user(db=db, username=user.username, password=user.password)
     if not db_user:
         raise HTTPException(status_code=400, detail="Invalid credentials")
-    return {"access_token": db_user.username, "token_type": "bearer"}
+    
+    access_token = auth.create_access_token(data={"sub": db_user.username})
+    return {
+        "access_token": access_token, 
+        "token_type": "bearer",
+        "username": db_user.username,
+        "email": db_user.email
+    }
+
+@router.get("/auth/me/", response_model=schemas.User)
+def read_users_me(current_user: str = Depends(auth.get_current_user), db: Session = Depends(get_db)):
+    db_user = db.query(models.User).filter(models.User.username == current_user).first()
+    if db_user is None:
+        raise HTTPException(status_code=404, detail="User not found")
+    return db_user
 
 # Order endpoints
 @router.get("/orders/", response_model=list[schemas.Order])

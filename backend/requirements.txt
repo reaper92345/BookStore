@@ -7,3 +7,6 @@ pydantic==1.10.7
 python-dotenv==1.0.0
 pymupdf==1.22.3
 python-multipart
+passlib[bcrypt]==1.7.4
+bcrypt==3.2.0
+python-jose[cryptography]==3.3.0

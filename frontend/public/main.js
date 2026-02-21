@@ -1,5 +1,32 @@
 document.addEventListener('DOMContentLoaded', function () {
   console.log('Main.js loaded v2');
+  
+  // Auth state management
+  const navAuth = document.getElementById('navAuth');
+  if (navAuth) {
+    const token = localStorage.getItem('access_token');
+    const userStr = localStorage.getItem('user');
+    
+    if (token && userStr) {
+      try {
+        const user = JSON.parse(userStr);
+        navAuth.innerHTML = `
+          <div class="user-info">
+            <span>Hi, <span class="username">${user.username}</span></span>
+            <button id="logoutBtn" class="btn btn-outline" style="padding: 4px 10px; font-size: 0.8rem;">Logout</button>
+          </div>
+        `;
+        
+        document.getElementById('logoutBtn').addEventListener('click', () => {
+          localStorage.removeItem('access_token');
+          localStorage.removeItem('user');
+          window.location.reload();
+        });
+      } catch (e) {
+        console.error('Error parsing user data', e);
+      }
+    }
+  }
   const search = document.getElementById('searchInput');
   const grid = document.getElementById('booksGrid');
 

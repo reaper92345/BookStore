@@ -21,7 +21,7 @@ services:
     ports:
       - "8000:8000"
     environment:
-      DATABASE_URL: "mysql://user:password@db:3306/bookstore"
+      DATABASE_URL: "mysql+pymysql://user:password@db:3306/bookstore"
       JWT_SECRET: "9a2e8c3f4e1d7a9b6c5d4e3f2g1h0i9j"
     depends_on:
       - db

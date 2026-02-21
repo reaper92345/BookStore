@@ -1,6 +1,8 @@
 <?php
 // Backend candidates tried by the proxy (order matters)
 function backend_candidates(): array {
+    // If we are in a Docker environment, 'backend' is the primary hostname.
+    // If not (e.g. running via XAMPP host), 'localhost' or '127.0.0.1' is used.
     return [
         'http://backend:8000',
         'http://localhost:8000',
@@ -35,8 +37,8 @@ function backend_request(string $method, string $path, $data = null, bool $isMul
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_CUSTOMREQUEST => strtoupper($method),
             CURLOPT_HTTPHEADER => $headers,
-            CURLOPT_TIMEOUT => 10,
-            CURLOPT_CONNECTTIMEOUT => 5,
+            CURLOPT_TIMEOUT => 5,
+            CURLOPT_CONNECTTIMEOUT => 1,
         ];
         if ($data !== null && in_array(strtoupper($method), ['POST','PUT','PATCH'])) {
             if ($isMultipart) {

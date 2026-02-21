@@ -23,7 +23,7 @@ function fetch_books(): array {
     $opts = [
         'http' => [
             'method' => 'GET',
-            'timeout' => 5,
+            'timeout' => 1,
             'header' => "Accept: application/json\r\n",
         ]
     ];
@@ -60,6 +60,24 @@ $books = fetch_books();
         <title>Online Bookstore</title>
         <link rel="stylesheet" href="/styles.css">
         <script defer src="/main.js?v=<?=time()?>"></script>
+        <style>
+            .user-info {
+                display: flex;
+                align-items: center;
+                gap: 12px;
+                color: var(--muted);
+                font-size: 0.9rem;
+            }
+            .user-info .username {
+                font-weight: 600;
+                color: var(--white);
+            }
+            .nav-auth {
+                display: flex;
+                align-items: center;
+                gap: 12px;
+            }
+        </style>
     </head>
     <body>
         <div class="site">
@@ -72,15 +90,19 @@ $books = fetch_books();
                         <a href="/" aria-label="Home">
                             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
                         </a>
-                        <a href="/books.php" aria-label="Books">
+                        <!-- <a href="/books.php" aria-label="Books">
                             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
-                        </a>
+                        </a> -->
                         <a href="/cart.php" aria-label="Cart">
                             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg>
                         </a>
                         <a href="/admin.php" aria-label="Admin">
                             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
                         </a>
+                        <div id="navAuth" class="nav-auth">
+                            <a href="/login.php" class="btn btn-outline" style="margin-left:8px; padding: 6px 12px; font-size: 0.85rem;">Login</a>
+                            <a href="/register.php" class="btn btn-primary" style="margin-left:8px; padding: 6px 12px; font-size: 0.85rem;">Register</a>
+                        </div>
                     </nav>
                 </div>
             </header>
