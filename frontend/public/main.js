@@ -173,7 +173,7 @@ document.addEventListener('DOMContentLoaded', function () {
         total += itemTotal;
 
         // Use a placeholder if no image (backend doesn't provide one yet)
-        const imageSrc = book.thumbnail_path || '/images/book-placeholder.png';
+        const imageSrc = book.thumbnail_path ? `/api/${book.thumbnail_path}` : '/images/book-placeholder.png';
 
         html += `
           <div class="cart-item" data-id="${item.id}">

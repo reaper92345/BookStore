@@ -1,56 +1,8 @@
 <?php
+require_once __DIR__ . '/api/config.php';
 
-function api_base(): string {
-    $scheme = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
-    
-    $server = $_SERVER['SERVER_NAME'] ?? ($_SERVER['HTTP_HOST'] ?? 'localhost');
-    $port = $_SERVER['SERVER_PORT'] ?? null;
-    $host = $server;
-    if ($port && $port !== '80' && $port !== '443') {
-        $host .= ':' . $port;
-    }
-    return $scheme . '://' . $host . '/api';
-}
-
-
-function fetch_books(): array {
-    $candidates = [
-        'http://backend:8000/books/',
-        'http://localhost:8000/books/',
-        'http://127.0.0.1:8000/books/',
-    ];
-
-    $opts = [
-        'http' => [
-            'method' => 'GET',
-            'timeout' => 1,
-            'header' => "Accept: application/json\r\n",
-        ]
-    ];
-
-    $errors = [];
-    foreach ($candidates as $url) {
-        $context = stream_context_create($opts);
-        $json = @file_get_contents($url, false, $context);
-        if ($json === false) {
-            $errors[] = "failed to fetch from $url";
-            continue;
-        }
-        $data = json_decode($json, true);
-        if (is_array($data)) {
-            
-            if (!isset($GLOBALS['BOOKS_FETCHED_FROM'])) $GLOBALS['BOOKS_FETCHED_FROM'] = $url;
-            return $data;
-        }
-        $errors[] = "invalid json from $url";
-    }
-
-
-    $GLOBALS['BOOKS_FETCH_ERROR'] = implode('; ', $errors);
-    return [];
-}
-
-$books = fetch_books();
+$books_result = backend_request('GET', '/books/');
+$books = $books_result['data'] ?? [];
 ?>
 <!doctype html>
 <html lang="en">

@@ -28,8 +28,9 @@ class Book(Base):
     thumbnail_path = Column(String(255), nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow)
 
-    order_items = relationship("OrderItem", back_populates="book")
-    comments = relationship("Comment", back_populates="book")
+    order_items = relationship("OrderItem", back_populates="book", cascade="all, delete-orphan")
+    comments = relationship("Comment", back_populates="book", cascade="all, delete-orphan")
+    cart_items = relationship("CartItem", back_populates="book", cascade="all, delete-orphan")
 
 class Order(Base):
     __tablename__ = 'orders'
@@ -85,4 +86,4 @@ class CartItem(Base):
     quantity = Column(Integer, default=1)
 
     cart = relationship("Cart", back_populates="items")
-    book = relationship("Book")
+    book = relationship("Book", back_populates="cart_items")
