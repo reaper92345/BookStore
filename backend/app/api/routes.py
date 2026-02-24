@@ -140,7 +140,8 @@ def login(user: schemas.UserLogin, db: Session = Depends(get_db)):
         "access_token": access_token, 
         "token_type": "bearer",
         "username": db_user.username,
-        "email": db_user.email
+        "email": db_user.email,
+        "id": db_user.id
     }
 
 @router.get("/auth/me/", response_model=schemas.User)
@@ -158,7 +159,12 @@ def read_orders(db: Session = Depends(get_db)):
 
 @router.post("/orders/", response_model=schemas.Order)
 def create_order(order: schemas.OrderCreate, db: Session = Depends(get_db)):
-    return crud.create_order(db=db, order=order)
+    try:
+        return crud.create_order(db=db, order=order)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail="An error occurred during checkout")
 
 # Comment endpoints
 @router.get("/comments/", response_model=list[schemas.Comment])

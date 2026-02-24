@@ -38,12 +38,87 @@
             const provider = params.get('provider') || 'Payment Gateway';
             document.getElementById('paymentProvider').textContent = provider;
             
-            // Simulate redirect or completion
-            setTimeout(() => {
-                // In a real app, this would be the callback from payment gateway
-                alert('This is a demo. Payment would happen here.');
-                window.location.href = '/';
-            }, 3000);
+            async function processCheckout() {
+                const statusText = document.querySelector('.status-text');
+                const subText = document.querySelector('.sub-text');
+                
+                try {
+                    const cartId = localStorage.getItem('cart_id');
+                    const userStr = localStorage.getItem('user');
+                    
+                    if (!userStr) {
+                        alert('Please login to complete your purchase.');
+                        window.location.href = '/login.php';
+                        return;
+                    }
+                    
+                    const user = JSON.parse(userStr);
+                    if (!user.id) {
+                        // If id is missing, the user needs to re-login (legacy session)
+                        alert('Your session is incomplete. Please login again.');
+                        window.location.href = '/login.php';
+                        return;
+                    }
+
+                    if (!cartId) {
+                        alert('Your cart is empty.');
+                        window.location.href = '/';
+                        return;
+                    }
+
+                    // 1. Fetch cart items
+                    const cartResp = await fetch(`/api/cart/?cart_id=${cartId}`);
+                    if (!cartResp.ok) throw new Error('Failed to fetch cart items');
+                    const cartItems = await cartResp.json();
+                    
+                    if (!cartItems || cartItems.length === 0) {
+                        alert('Your cart is empty.');
+                        window.location.href = '/';
+                        return;
+                    }
+
+                    // 2. Prepare order payload
+                    const orderPayload = {
+                        user_id: user.id,
+                        items: cartItems.map(item => ({
+                            book_id: item.book_id,
+                            quantity: item.quantity
+                        }))
+                    };
+
+                    // 3. Create the order (this triggers stock deduction and validation)
+                    statusText.textContent = 'Finalizing Order...';
+                    const orderResp = await fetch('/api/orders/', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(orderPayload)
+                    });
+
+                    const orderData = await orderResp.json();
+
+                    if (orderResp.ok) {
+                        statusText.textContent = 'Payment Successful!';
+                        subText.textContent = 'Your order has been placed. Redirecting...';
+                        localStorage.removeItem('cart_id');
+                        setTimeout(() => {
+                            window.location.href = '/';
+                        }, 2000);
+                    } else {
+                        // Handle stock error or other validation issues
+                        const errorMsg = orderData.detail || 'Checkout failed points to an error.';
+                        alert(`Checkout Error: ${errorMsg}`);
+                        window.location.href = '/cart.php';
+                    }
+
+                } catch (err) {
+                    console.error('Checkout error:', err);
+                    alert('A system error occurred during checkout. Please try again.');
+                    window.location.href = '/cart.php';
+                }
+            }
+
+            // Start checkout process instead of simulation
+            setTimeout(processCheckout, 1500);
         </script>
     </body>
 </html>

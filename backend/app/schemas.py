@@ -113,3 +113,4 @@ class Token(BaseModel):
     token_type: str
     username: str
     email: str
+    id: int

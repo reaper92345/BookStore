@@ -110,11 +110,42 @@ def get_orders(db: Session):
     return db.query(models.Order).all()
 
 def create_order(db: Session, order: schemas.OrderCreate):
-    db_order = models.Order(user_id=order.user_id)
-    db.add(db_order)
-    db.commit()
-    db.refresh(db_order)
-    return db_order
+    try:
+        # 1. Validate stock level for all items first
+        for item in order.items:
+            db_book = db.query(models.Book).filter(models.Book.id == item.book_id).first()
+            if not db_book:
+                raise ValueError(f"Book with ID {item.book_id} not found")
+            if db_book.stock < item.quantity:
+                raise ValueError(f"Insufficient stock for '{db_book.title}'. Available: {db_book.stock}, Requested: {item.quantity}")
+
+        # 2. Create the main order record
+        db_order = models.Order(user_id=order.user_id)
+        db.add(db_order)
+        db.flush()  # To get db_order.id
+
+        # 3. Create order items and update book stock
+        for item in order.items:
+            db_book = db.query(models.Book).filter(models.Book.id == item.book_id).first()
+            
+            # Create OrderItem entry
+            db_item = models.OrderItem(
+                order_id=db_order.id,
+                book_id=item.book_id,
+                quantity=item.quantity,
+                price=db_book.price  # Store price at time of order
+            )
+            db.add(db_item)
+            
+            # Deduct from book stock
+            db_book.stock -= item.quantity
+
+        db.commit()
+        db.refresh(db_order)
+        return db_order
+    except Exception as e:
+        db.rollback()
+        raise e
 
 # Comment operations
 def add_comment(db: Session, comment: schemas.CommentCreate):

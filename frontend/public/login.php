@@ -138,7 +138,8 @@
                         localStorage.setItem('access_token', data.access_token);
                         localStorage.setItem('user', JSON.stringify({
                             username: data.username,
-                            email: data.email
+                            email: data.email,
+                            id: data.id
                         }));
                         window.location.href = '/';
                     } else {
